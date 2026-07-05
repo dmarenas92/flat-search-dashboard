@@ -2,130 +2,212 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Flat Search Dashboard</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%2316324f'/%3E%3Ctext x='32' y='44' font-size='34' font-family='Arial' font-weight='bold' fill='white' text-anchor='middle'%3E%C2%A3%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <style>
-  body { font-family: Arial, Helvetica, sans-serif; margin: 24px; color: #222; background: #f7f8fa; }
-  h1 { margin-bottom: 4px; }
-  .generated { color: #666; font-size: 13px; margin-bottom: 20px; }
-  .cards { display: flex; gap: 16px; margin-bottom: 24px; flex-wrap: wrap; }
-  .card { background: #fff; border-radius: 8px; padding: 14px 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.12); min-width: 130px; }
-  .card-value { font-size: 22px; font-weight: bold; color: #1F4E78; }
-  .card-label { font-size: 12px; color: #666; margin-top: 2px; }
+  * { box-sizing: border-box; }
+  body { font-family: 'Inter', -apple-system, 'Segoe UI', Arial, sans-serif; margin: 0; color: #1c2733; background: #f4f6f9; font-size: 14px; }
+  .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
 
-  .tabs { display: flex; gap: 8px; margin-bottom: 16px; }
-  .tab-btn { padding: 8px 18px; border: 1px solid #1F4E78; background: #fff; color: #1F4E78; border-radius: 6px; cursor: pointer; font-size: 14px; }
-  .tab-btn.active { background: #1F4E78; color: #fff; }
+  .hero { background: #16324f; color: #fff; padding: 34px 0 30px; }
+  .eyebrow { font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: #9fb6cd; font-weight: 600; margin-bottom: 6px; }
+  .hero h1 { margin: 0 0 6px; font-size: 26px; font-weight: 700; letter-spacing: -.01em; }
+  .hero-sub { margin: 0; color: #b9c9da; font-size: 13px; }
 
-  .filters { display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-end; margin-bottom: 16px; background: #fff; padding: 14px 18px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.12); }
-  .filters .field { display: flex; flex-direction: column; gap: 4px; }
-  .filters label { font-size: 12px; color: #666; }
-  .filters input[type=text], .filters select { padding: 7px 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 14px; min-width: 180px; }
-  .range-slider { position: relative; width: 220px; height: 20px; margin-top: 6px; }
-  .range-slider input[type=range] { position: absolute; left: 0; right: 0; top: 6px; width: 100%; margin: 0; pointer-events: none; -webkit-appearance: none; appearance: none; background: transparent; }
-  .range-slider input[type=range]::-webkit-slider-runnable-track { height: 4px; background: #ddd; border-radius: 2px; }
-  .range-slider input[type=range]::-webkit-slider-thumb { pointer-events: all; -webkit-appearance: none; appearance: none; width: 16px; height: 16px; border-radius: 50%; background: #1F4E78; cursor: pointer; margin-top: -6px; }
-  .range-slider input[type=range]::-moz-range-track { height: 4px; background: #ddd; border-radius: 2px; }
-  .range-slider input[type=range]::-moz-range-thumb { pointer-events: all; width: 16px; height: 16px; border-radius: 50%; background: #1F4E78; cursor: pointer; border: none; }
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin: -22px 0 22px; }
+  .stat { background: #fff; border: 1px solid #e4e9f0; border-radius: 12px; padding: 16px 18px; display: flex; align-items: center; gap: 13px; box-shadow: 0 1px 3px rgba(16,24,40,.06); }
+  .stat-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .stat-label { font-size: 12px; color: #5c6b7a; margin-bottom: 2px; }
+  .stat-value { font-size: 22px; font-weight: 700; letter-spacing: -.01em; }
 
-  table { border-collapse: collapse; width: 100%; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.12); }
-  th, td { padding: 8px 10px; border-bottom: 1px solid #e6e6e6; font-size: 13px; text-align: left; vertical-align: top; }
-  th { background: #1F4E78; color: #fff; cursor: pointer; user-select: none; white-space: nowrap; }
-  th:hover { background: #16395a; }
-  tbody tr:hover { background: #f0f5fa; }
-  td.additionals { max-width: 340px; color: #444; }
-  a { color: #0563C1; }
-  section { margin-bottom: 32px; }
-  footer { color: #888; font-size: 12px; margin-top: 24px; }
-  #map { height: 600px; border-radius: 8px; }
-  .map-note { color: #a33; font-size: 13px; }
+  .toolbar { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 14px; }
+  .tabs { display: inline-flex; background: #e8edf3; border-radius: 10px; padding: 4px; }
+  .tab-btn { border: 0; padding: 8px 22px; border-radius: 8px; background: transparent; color: #5c6b7a; font-weight: 500; font-size: 13px; font-family: inherit; cursor: pointer; }
+  .tab-btn.active { background: #fff; color: #16324f; font-weight: 600; box-shadow: 0 1px 2px rgba(16,24,40,.12); }
+
+  .filters { background: #fff; border: 1px solid #e4e9f0; border-radius: 12px; padding: 16px 18px; margin-bottom: 16px; display: flex; flex-wrap: wrap; gap: 22px; align-items: flex-end; box-shadow: 0 1px 3px rgba(16,24,40,.06); }
+  .field { display: flex; flex-direction: column; gap: 5px; }
+  .field label { font-size: 12px; font-weight: 500; color: #5c6b7a; }
+  .field input[type=text], .field select { height: 38px; padding: 0 12px; border: 1px solid #d5dde6; border-radius: 8px; font-size: 13px; font-family: inherit; color: #1c2733; background: #fff; min-width: 190px; }
+  .field input[type=text]:focus, .field select:focus { outline: none; border-color: #2a5f96; box-shadow: 0 0 0 3px rgba(42,95,150,.14); }
+  .filters-meta { margin-left: auto; display: flex; align-items: center; gap: 14px; }
+  #resultCount { font-size: 12px; color: #5c6b7a; }
+  .btn-reset { border: 1px solid #d5dde6; background: #fff; color: #5c6b7a; font-family: inherit; font-size: 12px; font-weight: 500; border-radius: 8px; padding: 8px 14px; cursor: pointer; }
+  .btn-reset:hover { background: #f4f6f9; color: #16324f; }
+
+  .range-wrap { position: relative; width: 250px; height: 30px; }
+  .range-track { position: absolute; top: 13px; height: 4px; width: 100%; background: #dfe6ee; border-radius: 2px; }
+  .range-fill { position: absolute; top: 13px; height: 4px; background: #2a5f96; border-radius: 2px; }
+  .range-wrap input[type=range] { position: absolute; top: 3px; left: 0; width: 100%; height: 24px; margin: 0; -webkit-appearance: none; appearance: none; background: transparent; pointer-events: none; }
+  .range-wrap input[type=range]::-webkit-slider-runnable-track { height: 24px; background: transparent; }
+  .range-wrap input[type=range]::-webkit-slider-thumb { pointer-events: auto; -webkit-appearance: none; appearance: none; width: 18px; height: 18px; margin-top: 3px; border-radius: 50%; background: #fff; border: 2px solid #2a5f96; box-shadow: 0 1px 3px rgba(16,24,40,.25); cursor: pointer; }
+  .range-wrap input[type=range]::-moz-range-track { height: 24px; background: transparent; }
+  .range-wrap input[type=range]::-moz-range-thumb { pointer-events: auto; width: 14px; height: 14px; border-radius: 50%; background: #fff; border: 2px solid #2a5f96; box-shadow: 0 1px 3px rgba(16,24,40,.25); cursor: pointer; }
+  .range-values { font-size: 12px; font-weight: 600; color: #16324f; }
+
+  .card { background: #fff; border: 1px solid #e4e9f0; border-radius: 12px; box-shadow: 0 1px 3px rgba(16,24,40,.06); margin-bottom: 22px; overflow: hidden; }
+  .card-head { display: flex; align-items: baseline; justify-content: space-between; padding: 16px 20px 12px; }
+  .card-title { font-size: 15px; font-weight: 600; margin: 0; }
+  .card-note { font-size: 12px; color: #8a97a5; }
+
+  .table-scroll { overflow-x: auto; }
+  table { border-collapse: collapse; width: 100%; font-size: 13px; }
+  thead th { background: #f8fafc; color: #5c6b7a; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; text-align: left; padding: 10px 12px; border-top: 1px solid #eef1f5; border-bottom: 1px solid #e4e9f0; white-space: nowrap; }
+  th.sortable { cursor: pointer; user-select: none; }
+  th.sortable::after { content: '↕'; opacity: .35; margin-left: 5px; font-size: 10px; }
+  th[data-asc="true"]::after { content: '↑'; opacity: 1; }
+  th[data-asc="false"]::after { content: '↓'; opacity: 1; }
+  th.sortable:hover { color: #16324f; }
+  tbody td { padding: 13px 12px; border-bottom: 1px solid #eef1f5; vertical-align: middle; }
+  tbody tr:last-child td { border-bottom: 0; }
+  tbody tr:hover { background: #f6f9fc; }
+  td.num { text-align: right; }
+  td.center { text-align: center; }
+  .prop-name { font-weight: 600; }
+  .prop-sub { font-size: 12px; color: #8a97a5; margin-top: 2px; }
+  .pcm { font-weight: 700; font-variant-numeric: tabular-nums; }
+  .badge { display: inline-block; font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 999px; white-space: nowrap; }
+  .badge-green { background: #e5f6ee; color: #14784e; }
+  .badge-amber { background: #fdf3e1; color: #92600a; }
+  .badge-gray { background: #eef1f5; color: #5c6b7a; }
+  .links { display: flex; gap: 6px; flex-wrap: wrap; }
+  .btn-link { display: inline-flex; align-items: center; gap: 5px; border: 1px solid #d5dde6; border-radius: 8px; padding: 4px 10px; font-size: 12px; font-weight: 500; color: #2a5f96; text-decoration: none; white-space: nowrap; }
+  .btn-link:hover { background: #eef4fa; border-color: #b9cde0; }
+  td.details { max-width: 300px; font-size: 12px; color: #5c6b7a; line-height: 1.45; }
+  td.details { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+
+  #map { height: 560px; }
+  .price-pin { position: relative; background: #fff; border: 1px solid #cfd9e4; border-radius: 999px; padding: 4px 11px; font-weight: 700; font-size: 12px; color: #16324f; box-shadow: 0 2px 8px rgba(16,24,40,.22); white-space: nowrap; transform: translate(-50%, calc(-100% - 6px)); width: max-content; cursor: pointer; }
+  .price-pin::after { content: ''; position: absolute; left: 50%; bottom: -5px; transform: translateX(-50%); border: 5px solid transparent; border-top-color: #fff; border-bottom: 0; }
+  .leaflet-popup-content-wrapper { border-radius: 10px; box-shadow: 0 4px 16px rgba(16,24,40,.2); }
+  .leaflet-popup-content { margin: 14px 16px; font-family: 'Inter', Arial, sans-serif; font-size: 13px; line-height: 1.5; }
+  .popup-name { font-weight: 700; font-size: 14px; }
+  .popup-sub { color: #5c6b7a; font-size: 12px; margin-bottom: 4px; }
+  .popup-price { font-weight: 700; color: #16324f; font-size: 15px; }
+  .popup-agent { color: #8a97a5; font-size: 12px; margin-bottom: 8px; }
+  .map-note { color: #a33; font-size: 13px; padding: 12px 20px; }
+
+  .chart-wrap { padding: 6px 20px 16px; }
+  footer { color: #8a97a5; font-size: 12px; text-align: center; padding: 8px 0 34px; }
+  @media (max-width: 720px) {
+    .hero { padding: 26px 0 24px; }
+    .stats { margin-top: -18px; }
+    .filters { gap: 14px; }
+    .filters-meta { margin-left: 0; }
+  }
 </style>
 </head>
 <body>
-  <h1>Flat Search Dashboard</h1>
-  <div class="generated">Generado: 2026-07-04 20:32</div>
-
-  <div class="cards"><div class="card"><div class="card-value">5</div><div class="card-label">Propiedades</div></div><div class="card"><div class="card-value">£1,950</div><div class="card-label">PCM mínimo</div></div><div class="card"><div class="card-value">£2,075</div><div class="card-label">PCM promedio</div></div><div class="card"><div class="card-value">£2,200</div><div class="card-label">PCM máximo</div></div></div>
-
-  <div class="tabs">
-    <button class="tab-btn active" data-tab="table">Tabla</button>
-    <button class="tab-btn" data-tab="map">Mapa</button>
-  </div>
-
-  <div class="filters">
-    <div class="field">
-      <label for="filter">Buscar (texto libre)</label>
-      <input id="filter" type="text" placeholder="Barrio, agente, precio...">
+  <header class="hero">
+    <div class="container">
+      <div class="eyebrow">Flat Tracker · Camden · NW1 · Londres</div>
+      <h1>Flat Search Dashboard</h1>
+      <p class="hero-sub">Actualizado el 2026-07-04 21:37 · 5 propiedades en seguimiento</p>
     </div>
-    <div class="field">
-      <label for="filterPostcode">Postcode</label>
-      <select id="filterPostcode">
-        <option value="">Todos</option>
-        <option value="NW1 (Agar Grove)">NW1 (Agar Grove)</option><option value="NW1 (Chalk Farm Road)">NW1 (Chalk Farm Road)</option><option value="NW1 (Cliff Road)">NW1 (Cliff Road)</option><option value="NW1 (Crowndale Road)">NW1 (Crowndale Road)</option><option value="NW1 (approx.)">NW1 (approx.)</option>
-      </select>
-    </div>
-    <div class="field">
-      <label for="filterAgent">Agente</label>
-      <select id="filterAgent">
-        <option value="">Todos</option>
-        <option value="Aston Square, London">Aston Square, London</option><option value="Black Katz, Camden">Black Katz, Camden</option><option value="Paramount, London - Lettings">Paramount, London - Lettings</option><option value="Savills Lettings, Primrose Hill">Savills Lettings, Primrose Hill</option><option value="Winkworth, Kentish Town">Winkworth, Kentish Town</option>
-      </select>
-    </div>
-    <div class="field">
-      <label>PCM: <span id="pcmMinLabel"></span> - <span id="pcmMaxLabel"></span></label>
-      <div class="range-slider">
-        <input type="range" id="pcmMin" min="1950" max="2200" value="1950" step="1">
-        <input type="range" id="pcmMax" min="1950" max="2200" value="2200" step="1">
+  </header>
+
+  <div class="container">
+    <div class="stats"><div class="stat"><div class="stat-icon" style="background:#e8f0fb;color:#2a5f96;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div><div><div class="stat-label">Propiedades</div><div class="stat-value">5</div></div></div><div class="stat"><div class="stat-icon" style="background:#e5f6ee;color:#0e9f6e;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/></svg></div><div><div class="stat-label">PCM mínimo</div><div class="stat-value">£1,950</div></div></div><div class="stat"><div class="stat-icon" style="background:#eeebfb;color:#6355c7;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div><div><div class="stat-label">PCM promedio</div><div class="stat-value">£2,075</div></div></div><div class="stat"><div class="stat-icon" style="background:#fdf1e2;color:#c07c14;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></div><div><div class="stat-label">PCM máximo</div><div class="stat-value">£2,200</div></div></div></div>
+
+    <div class="toolbar">
+      <div class="tabs">
+        <button class="tab-btn active" data-tab="table">Tabla</button>
+        <button class="tab-btn" data-tab="map">Mapa</button>
       </div>
     </div>
+
+    <div class="filters">
+      <div class="field">
+        <label for="filter">Buscar</label>
+        <input id="filter" type="text" placeholder="Barrio, agente, características...">
+      </div>
+      <div class="field">
+        <label for="filterPostcode">Postcode</label>
+        <select id="filterPostcode">
+          <option value="">Todos</option>
+          <option value="NW1 (Agar Grove)">NW1 (Agar Grove)</option><option value="NW1 (Chalk Farm Road)">NW1 (Chalk Farm Road)</option><option value="NW1 (Cliff Road)">NW1 (Cliff Road)</option><option value="NW1 (Crowndale Road)">NW1 (Crowndale Road)</option><option value="NW1 (approx.)">NW1 (approx.)</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="filterAgent">Agente</label>
+        <select id="filterAgent">
+          <option value="">Todos</option>
+          <option value="Aston Square, London">Aston Square, London</option><option value="Black Katz, Camden">Black Katz, Camden</option><option value="Paramount, London - Lettings">Paramount, London - Lettings</option><option value="Savills Lettings, Primrose Hill">Savills Lettings, Primrose Hill</option><option value="Winkworth, Kentish Town">Winkworth, Kentish Town</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Rango PCM &nbsp;<span class="range-values"><span id="pcmMinLabel"></span> – <span id="pcmMaxLabel"></span></span></label>
+        <div class="range-wrap">
+          <div class="range-track"></div>
+          <div class="range-fill" id="pcmFill"></div>
+          <input type="range" id="pcmMin" min="1950" max="2200" value="1950" step="1">
+          <input type="range" id="pcmMax" min="1950" max="2200" value="2200" step="1">
+        </div>
+      </div>
+      <div class="filters-meta">
+        <span id="resultCount"></span>
+        <button class="btn-reset" id="btnReset">Limpiar filtros</button>
+      </div>
+    </div>
+
+    <section id="tableSection" class="card">
+      <div class="table-scroll">
+        <table id="listings">
+          <thead>
+            <tr>
+              <th class="sortable">Propiedad</th>
+              <th class="sortable" style="text-align:right;">PCM</th>
+              <th class="sortable" style="text-align:center;">Hab · Baño</th>
+              <th class="sortable" style="text-align:center;">Amueblado</th>
+              <th class="sortable">Agente</th>
+              <th class="sortable" style="text-align:center;">LBS</th>
+              <th class="sortable" style="text-align:center;">Nesta</th>
+              <th>Enlaces</th>
+              <th>Detalles</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td data-value="NW1 (approx.)"><div class="prop-name">NW1 (approx.)</div><div class="prop-sub">Mornington Crescent, Camden</div></td><td class="num" data-value="2200"><span class="pcm">£2,200</span></td><td class="center" data-value="1">1 · 1</td><td class="center" data-value="Flexible"><span class="badge badge-amber">Flexible</span></td><td data-value="Aston Square, London">Aston Square, London</td><td class="center" data-value="22.5">20-25 min</td><td class="center" data-value="21.0">20-22 min</td><td><div class="links"><a class="btn-link" href="https://www.google.com/maps/search/Mornington+Crescent+Camden+London" target="_blank" rel="noopener"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>Mapa</a><a class="btn-link" href="https://www.rightmove.co.uk/properties/90432435" target="_blank" rel="noopener"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>Rightmove</a></div></td><td class="details" title="Private balcony, communal garden access, close to Mornington Crescent tube, near Regent&#x27;s Park and Camden Market">Private balcony, communal garden access, close to Mornington Crescent tube, near Regent&#x27;s Park and Camden Market</td></tr><tr><td data-value="NW1 (Cliff Road)"><div class="prop-name">NW1 (Cliff Road)</div><div class="prop-sub">Kentish Town / Camden Town</div></td><td class="num" data-value="1950"><span class="pcm">£1,950</span></td><td class="center" data-value="1">1 · 1</td><td class="center" data-value="Yes"><span class="badge badge-green">Yes</span></td><td data-value="Winkworth, Kentish Town">Winkworth, Kentish Town</td><td class="center" data-value="27.5">25-30 min</td><td class="center" data-value="27.5">25-30 min</td><td><div class="links"><a class="btn-link" href="https://www.google.com/maps/search/Cliff+Road+NW1+London" target="_blank" rel="noopener"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>Mapa</a><a class="btn-link" href="https://www.rightmove.co.uk/properties/90361494" target="_blank" rel="noopener"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>Rightmove</a></div></td><td class="details" title="2nd floor, separate reception room, modern kitchen/bathroom, optional parking +£100pcm, 5-week deposit, available early Aug 2026">2nd floor, separate reception room, modern kitchen/bathroom, optional parking +£100pcm, 5-week deposit, available early Aug 2026</td></tr><tr><td data-value="NW1 (Chalk Farm Road)"><div class="prop-name">NW1 (Chalk Farm Road)</div><div class="prop-sub">Chalk Farm</div></td><td class="num" data-value="2058"><span class="pcm">£2,058</span></td><td class="center" data-value="1">1 · 1</td><td class="center" data-value="Yes"><span class="badge badge-green">Yes</span></td><td data-value="Savills Lettings, Primrose Hill">Savills Lettings, Primrose Hill</td><td class="center" data-value="22.5">20-25 min</td><td class="center" data-value="23.5">22-25 min</td><td><div class="links"><a class="btn-link" href="https://www.google.com/maps/search/Chalk+Farm+Road+NW1+London" target="_blank" rel="noopener"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>Mapa</a><a class="btn-link" href="https://www.rightmove.co.uk/properties/87912141" target="_blank" rel="noopener"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>Rightmove</a></div></td><td class="details" title="Reception room, fully-fitted kitchen, wooden flooring, lift, EPC D, 469 sq ft, 1-2 min walk to Chalk Farm station (Northern line), close to Camden High St and Primrose Hill, price reduced 30/06/2026, available now">Reception room, fully-fitted kitchen, wooden flooring, lift, EPC D, 469 sq ft, 1-2 min walk to Chalk Farm station (Northern line), close to Camden High St and Primrose Hill, price reduced 30/06/2026, available now</td></tr><tr><td data-value="NW1 (Agar Grove)"><div class="prop-name">NW1 (Agar Grove)</div><div class="prop-sub">Camden / Agar Grove</div></td><td class="num" data-value="2167"><span class="pcm">£2,167</span></td><td class="center" data-value="1">1 · 1</td><td class="center" data-value="Ask agent"><span class="badge badge-gray">Ask agent</span></td><td data-value="Black Katz, Camden">Black Katz, Camden</td><td class="center" data-value="27.5">25-30 min</td><td class="center" data-value="26.5">25-28 min</td><td><div class="links"><a class="btn-link" href="https://www.google.com/maps/search/Agar+Grove+Camden+NW1+London" target="_blank" rel="noopener"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>Mapa</a><a class="btn-link" href="https://www.rightmove.co.uk/properties/90197247" target="_blank" rel="noopener"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>Rightmove</a></div></td><td class="details" title="2nd floor period conversion, recently refurbished, open-plan kitchen/lounge, wood floors, tiled shower room, good storage, walking distance to Camden tube/market and King&#x27;s Cross, deposit £2,500, available 03/08/2026">2nd floor period conversion, recently refurbished, open-plan kitchen/lounge, wood floors, tiled shower room, good storage, walking distance to Camden tube/market and King&#x27;s Cross, deposit £2,500, available 03/08/2026</td></tr><tr><td data-value="NW1 (Crowndale Road)"><div class="prop-name">NW1 (Crowndale Road)</div><div class="prop-sub">Mornington Crescent, Camden</div></td><td class="num" data-value="2000"><span class="pcm">£2,000</span></td><td class="center" data-value="1">1 · 1</td><td class="center" data-value="Yes"><span class="badge badge-green">Yes</span></td><td data-value="Paramount, London - Lettings">Paramount, London - Lettings</td><td class="center" data-value="22.5">20-25 min</td><td class="center" data-value="21.0">20-22 min</td><td><div class="links"><a class="btn-link" href="https://www.google.com/maps/search/Crowndale+Road+Mornington+Crescent+NW1+London" target="_blank" rel="noopener"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>Mapa</a><a class="btn-link" href="https://www.rightmove.co.uk/properties/89860464" target="_blank" rel="noopener"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>Rightmove</a></div></td><td class="details" title="Modern kitchen w/ dishwasher, private balcony, lift access, wood flooring, sliding door between living room/bedroom, managed by owner, 25% council tax discount for single occupancy, bills not included, 371 sq ft, price reduced, available now, deposit £2,307">Modern kitchen w/ dishwasher, private balcony, lift access, wood flooring, sliding door between living room/bedroom, managed by owner, 25% council tax discount for single occupancy, bills not included, 371 sq ft, price reduced, available now, deposit £2,307</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="mapSection" class="card" style="display:none;">
+      <div id="map"></div>
+      <p id="mapNote" class="map-note" style="display:none;"></p>
+    </section>
+
+    <section class="card">
+      <div class="card-head">
+        <h2 class="card-title">PCM por propiedad</h2>
+        <span class="card-note">La barra verde marca el precio más bajo</span>
+      </div>
+      <div class="chart-wrap">
+        <svg viewBox="0 0 785 258" width="100%" height="258" xmlns="http://www.w3.org/2000/svg" font-family="Inter, Arial, sans-serif"><line x1="250.0" y1="8" x2="250.0" y2="234" stroke="#e9edf3" stroke-width="1"/><text x="250.0" y="250" text-anchor="middle" font-size="10" fill="#8a97a5">£0</text><line x1="338.0" y1="8" x2="338.0" y2="234" stroke="#e9edf3" stroke-width="1"/><text x="338.0" y="250" text-anchor="middle" font-size="10" fill="#8a97a5">£500</text><line x1="426.0" y1="8" x2="426.0" y2="234" stroke="#e9edf3" stroke-width="1"/><text x="426.0" y="250" text-anchor="middle" font-size="10" fill="#8a97a5">£1,000</text><line x1="514.0" y1="8" x2="514.0" y2="234" stroke="#e9edf3" stroke-width="1"/><text x="514.0" y="250" text-anchor="middle" font-size="10" fill="#8a97a5">£1,500</text><line x1="602.0" y1="8" x2="602.0" y2="234" stroke="#e9edf3" stroke-width="1"/><text x="602.0" y="250" text-anchor="middle" font-size="10" fill="#8a97a5">£2,000</text><line x1="690.0" y1="8" x2="690.0" y2="234" stroke="#e9edf3" stroke-width="1"/><text x="690.0" y="250" text-anchor="middle" font-size="10" fill="#8a97a5">£2,500</text><text x="236" y="22" text-anchor="end" font-size="13" font-weight="600" fill="#1c2733">NW1 (approx.)<tspan x="236" dy="14" font-size="11" font-weight="400" fill="#8a97a5">Mornington Crescent, Camden</tspan></text><rect x="250" y="10" width="387.2" height="30" fill="#2a5f96" rx="5"/><text x="647.2" y="29" font-size="13" font-weight="600" fill="#1c2733">£2,200</text><text x="236" y="66" text-anchor="end" font-size="13" font-weight="600" fill="#1c2733">NW1 (Cliff Road)<tspan x="236" dy="14" font-size="11" font-weight="400" fill="#8a97a5">Kentish Town / Camden Town</tspan></text><rect x="250" y="54" width="343.2" height="30" fill="#0e9f6e" rx="5"/><text x="603.2" y="73" font-size="13" font-weight="600" fill="#1c2733">£1,950</text><text x="236" y="110" text-anchor="end" font-size="13" font-weight="600" fill="#1c2733">NW1 (Chalk Farm Road)<tspan x="236" dy="14" font-size="11" font-weight="400" fill="#8a97a5">Chalk Farm</tspan></text><rect x="250" y="98" width="362.2" height="30" fill="#2a5f96" rx="5"/><text x="622.2" y="117" font-size="13" font-weight="600" fill="#1c2733">£2,058</text><text x="236" y="154" text-anchor="end" font-size="13" font-weight="600" fill="#1c2733">NW1 (Agar Grove)<tspan x="236" dy="14" font-size="11" font-weight="400" fill="#8a97a5">Camden / Agar Grove</tspan></text><rect x="250" y="142" width="381.4" height="30" fill="#2a5f96" rx="5"/><text x="641.4" y="161" font-size="13" font-weight="600" fill="#1c2733">£2,167</text><text x="236" y="198" text-anchor="end" font-size="13" font-weight="600" fill="#1c2733">NW1 (Crowndale Road)<tspan x="236" dy="14" font-size="11" font-weight="400" fill="#8a97a5">Mornington Crescent, Camden</tspan></text><rect x="250" y="186" width="352.0" height="30" fill="#2a5f96" rx="5"/><text x="612.0" y="205" font-size="13" font-weight="600" fill="#1c2733">£2,000</text></svg>
+      </div>
+    </section>
+
+    <footer>Flat Tracker · generado el 2026-07-04 21:37</footer>
   </div>
-
-  <section id="tableSection">
-    <table id="listings">
-      <thead>
-        <tr>
-          <th>Postcode</th>
-          <th>Neighborhood</th>
-          <th>PCM</th>
-          <th>Beds</th>
-          <th>Bathrooms</th>
-          <th>Furnished?</th>
-          <th>Map</th>
-          <th>Rightmove</th>
-          <th>Agent</th>
-          <th>Time to LBS</th>
-          <th>Time to Nesta</th>
-          <th>Additionals</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr><td data-value="NW1 (approx.)">NW1 (approx.)</td><td data-value="Mornington Crescent, Camden">Mornington Crescent, Camden</td><td data-value="2200">£2,200</td><td data-value="1">1</td><td data-value="1">1</td><td data-value="Flexible">Flexible</td><td><a href="https://www.google.com/maps/search/Mornington+Crescent+Camden+London" target="_blank" rel="noopener">Ver mapa</a></td><td><a href="https://www.rightmove.co.uk/properties/90432435" target="_blank" rel="noopener">Rightmove</a></td><td data-value="Aston Square, London">Aston Square, London</td><td data-value="22.5">~20-25 min (approx.)</td><td data-value="21.0">~20-22 min (approx.)</td><td class="additionals">Private balcony, communal garden access, close to Mornington Crescent tube, near Regent&#x27;s Park and Camden Market</td></tr><tr><td data-value="NW1 (Cliff Road)">NW1 (Cliff Road)</td><td data-value="Kentish Town / Camden Town">Kentish Town / Camden Town</td><td data-value="1950">£1,950</td><td data-value="1">1</td><td data-value="1">1</td><td data-value="Yes">Yes</td><td><a href="https://www.google.com/maps/search/Cliff+Road+NW1+London" target="_blank" rel="noopener">Ver mapa</a></td><td><a href="https://www.rightmove.co.uk/properties/90361494" target="_blank" rel="noopener">Rightmove</a></td><td data-value="Winkworth, Kentish Town">Winkworth, Kentish Town</td><td data-value="27.5">~25-30 min (approx.)</td><td data-value="27.5">~25-30 min (approx.)</td><td class="additionals">2nd floor, separate reception room, modern kitchen/bathroom, optional parking +£100pcm, 5-week deposit, available early Aug 2026</td></tr><tr><td data-value="NW1 (Chalk Farm Road)">NW1 (Chalk Farm Road)</td><td data-value="Chalk Farm">Chalk Farm</td><td data-value="2058">£2,058</td><td data-value="1">1</td><td data-value="1">1</td><td data-value="Yes">Yes</td><td><a href="https://www.google.com/maps/search/Chalk+Farm+Road+NW1+London" target="_blank" rel="noopener">Ver mapa</a></td><td><a href="https://www.rightmove.co.uk/properties/87912141" target="_blank" rel="noopener">Rightmove</a></td><td data-value="Savills Lettings, Primrose Hill">Savills Lettings, Primrose Hill</td><td data-value="22.5">~20-25 min (approx.)</td><td data-value="23.5">~22-25 min (approx.)</td><td class="additionals">Reception room, fully-fitted kitchen, wooden flooring, lift, EPC D, 469 sq ft, 1-2 min walk to Chalk Farm station (Northern line), close to Camden High St and Primrose Hill, price reduced 30/06/2026, available now</td></tr><tr><td data-value="NW1 (Agar Grove)">NW1 (Agar Grove)</td><td data-value="Camden / Agar Grove">Camden / Agar Grove</td><td data-value="2167">£2,167</td><td data-value="1">1</td><td data-value="1">1</td><td data-value="Ask agent">Ask agent</td><td><a href="https://www.google.com/maps/search/Agar+Grove+Camden+NW1+London" target="_blank" rel="noopener">Ver mapa</a></td><td><a href="https://www.rightmove.co.uk/properties/90197247" target="_blank" rel="noopener">Rightmove</a></td><td data-value="Black Katz, Camden">Black Katz, Camden</td><td data-value="27.5">~25-30 min (approx.)</td><td data-value="26.5">~25-28 min (approx.)</td><td class="additionals">2nd floor period conversion, recently refurbished, open-plan kitchen/lounge, wood floors, tiled shower room, good storage, walking distance to Camden tube/market and King&#x27;s Cross, deposit £2,500, available 03/08/2026</td></tr><tr><td data-value="NW1 (Crowndale Road)">NW1 (Crowndale Road)</td><td data-value="Mornington Crescent, Camden">Mornington Crescent, Camden</td><td data-value="2000">£2,000</td><td data-value="1">1</td><td data-value="1">1</td><td data-value="Yes">Yes</td><td><a href="https://www.google.com/maps/search/Crowndale+Road+Mornington+Crescent+NW1+London" target="_blank" rel="noopener">Ver mapa</a></td><td><a href="https://www.rightmove.co.uk/properties/89860464" target="_blank" rel="noopener">Rightmove</a></td><td data-value="Paramount, London - Lettings">Paramount, London - Lettings</td><td data-value="22.5">~20-25 min (approx.)</td><td data-value="21.0">~20-22 min (approx.)</td><td class="additionals">Modern kitchen w/ dishwasher, private balcony, lift access, wood flooring, sliding door between living room/bedroom, managed by owner, 25% council tax discount for single occupancy, bills not included, 371 sq ft, price reduced, available now, deposit £2,307</td></tr>
-      </tbody>
-    </table>
-  </section>
-
-  <section id="mapSection" style="display:none;">
-    <div id="map"></div>
-    <p id="mapNote" class="map-note"></p>
-  </section>
-
-  <section>
-    <h2>PCM por propiedad</h2>
-    <svg viewBox="0 0 830 202" width="100%" height="202" xmlns="http://www.w3.org/2000/svg" font-family="Arial, sans-serif"><text x="250" y="29.7" text-anchor="end" font-size="12" fill="#333">NW1 (approx.) — Mornington Crescent, Camden</text><rect x="260" y="12" width="480.0" height="26" fill="#1F4E78" rx="3"/><text x="748.0" y="29.7" font-size="12" fill="#333">£2,200</text><text x="250" y="67.7" text-anchor="end" font-size="12" fill="#333">NW1 (Cliff Road) — Kentish Town / Camden Town</text><rect x="260" y="50" width="425.5" height="26" fill="#1F4E78" rx="3"/><text x="693.5" y="67.7" font-size="12" fill="#333">£1,950</text><text x="250" y="105.7" text-anchor="end" font-size="12" fill="#333">NW1 (Chalk Farm Road) — Chalk Farm</text><rect x="260" y="88" width="449.0" height="26" fill="#1F4E78" rx="3"/><text x="717.0" y="105.7" font-size="12" fill="#333">£2,058</text><text x="250" y="143.7" text-anchor="end" font-size="12" fill="#333">NW1 (Agar Grove) — Camden / Agar Grove</text><rect x="260" y="126" width="472.8" height="26" fill="#1F4E78" rx="3"/><text x="740.8" y="143.7" font-size="12" fill="#333">£2,167</text><text x="250" y="181.7" text-anchor="end" font-size="12" fill="#333">NW1 (Crowndale Road) — Mornington Crescent, Camden</text><rect x="260" y="164" width="436.4" height="26" fill="#1F4E78" rx="3"/><text x="704.4" y="181.7" font-size="12" fill="#333">£2,000</text></svg>
-  </section>
-
-  <footer>Flat Tracker Dashboard &middot; 5 propiedades</footer>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 const PROPERTIES = [{"postcode": "NW1 (approx.)", "neighborhood": "Mornington Crescent, Camden", "pcm": 2200, "agent": "Aston Square, London", "rightmove_url": "https://www.rightmove.co.uk/properties/90432435", "lat": 51.5340608, "lon": -0.1380918}, {"postcode": "NW1 (Cliff Road)", "neighborhood": "Kentish Town / Camden Town", "pcm": 1950, "agent": "Winkworth, Kentish Town", "rightmove_url": "https://www.rightmove.co.uk/properties/90361494", "lat": 51.5471642, "lon": -0.1291329}, {"postcode": "NW1 (Chalk Farm Road)", "neighborhood": "Chalk Farm", "pcm": 2058, "agent": "Savills Lettings, Primrose Hill", "rightmove_url": "https://www.rightmove.co.uk/properties/87912141", "lat": 51.5398554, "lon": -0.1425007}, {"postcode": "NW1 (Agar Grove)", "neighborhood": "Camden / Agar Grove", "pcm": 2167, "agent": "Black Katz, Camden", "rightmove_url": "https://www.rightmove.co.uk/properties/90197247", "lat": 51.5433333, "lon": -0.1281251}, {"postcode": "NW1 (Crowndale Road)", "neighborhood": "Mornington Crescent, Camden", "pcm": 2000, "agent": "Paramount, London - Lettings", "rightmove_url": "https://www.rightmove.co.uk/properties/89860464", "lat": 51.5352593, "lon": -0.1352824}];
 
-document.querySelectorAll('#listings thead th').forEach((th, idx) => {
+const headers = document.querySelectorAll('#listings thead th');
+headers.forEach((th, idx) => {
+  if (!th.classList.contains('sortable')) return;
   th.addEventListener('click', () => {
     const tbody = document.querySelector('#listings tbody');
     const rows = Array.from(tbody.querySelectorAll('tr'));
     const asc = th.dataset.asc !== 'true';
-    document.querySelectorAll('#listings thead th').forEach(h => delete h.dataset.asc);
+    headers.forEach(h => h.removeAttribute('data-asc'));
     th.dataset.asc = asc;
     rows.sort((a, b) => {
       const ca = a.children[idx], cb = b.children[idx];
@@ -149,12 +231,20 @@ const filterPostcode = document.getElementById('filterPostcode');
 const filterAgent = document.getElementById('filterAgent');
 const pcmMin = document.getElementById('pcmMin');
 const pcmMax = document.getElementById('pcmMax');
+const pcmFill = document.getElementById('pcmFill');
 const pcmMinLabel = document.getElementById('pcmMinLabel');
 const pcmMaxLabel = document.getElementById('pcmMaxLabel');
+const resultCount = document.getElementById('resultCount');
+const totalRows = document.querySelectorAll('#listings tbody tr').length;
 
-function updatePcmLabels() {
+function updateSlider() {
   pcmMinLabel.textContent = '£' + Number(pcmMin.value).toLocaleString();
   pcmMaxLabel.textContent = '£' + Number(pcmMax.value).toLocaleString();
+  const lo = +pcmMin.min, hi = +pcmMin.max, span = hi - lo || 1;
+  const a = (+pcmMin.value - lo) / span * 100;
+  const b = (+pcmMax.value - lo) / span * 100;
+  pcmFill.style.left = a + '%';
+  pcmFill.style.width = (b - a) + '%';
 }
 
 function applyFilters() {
@@ -163,16 +253,19 @@ function applyFilters() {
   const agentVal = filterAgent.value;
   const minVal = parseFloat(pcmMin.value);
   const maxVal = parseFloat(pcmMax.value);
+  let visibleCount = 0;
   document.querySelectorAll('#listings tbody tr').forEach(row => {
     const rowPostcode = row.children[0].dataset.value;
-    const rowAgent = row.children[8].dataset.value;
-    const rowPcm = parseFloat(row.children[2].dataset.value);
+    const rowPcm = parseFloat(row.children[1].dataset.value);
+    const rowAgent = row.children[4].dataset.value;
     let visible = row.textContent.toLowerCase().includes(q);
     if (postcodeVal && rowPostcode !== postcodeVal) visible = false;
     if (agentVal && rowAgent !== agentVal) visible = false;
     if (!isNaN(rowPcm) && (rowPcm < minVal || rowPcm > maxVal)) visible = false;
     row.style.display = visible ? '' : 'none';
+    if (visible) visibleCount++;
   });
+  resultCount.textContent = 'Mostrando ' + visibleCount + ' de ' + totalRows;
 }
 
 function clampAndApply(moved) {
@@ -180,16 +273,26 @@ function clampAndApply(moved) {
     if (moved === 'min') pcmMin.value = pcmMax.value;
     else pcmMax.value = pcmMin.value;
   }
-  updatePcmLabels();
+  updateSlider();
   applyFilters();
 }
 
-filterText.addEventListener('keyup', applyFilters);
+filterText.addEventListener('input', applyFilters);
 filterPostcode.addEventListener('change', applyFilters);
 filterAgent.addEventListener('change', applyFilters);
 pcmMin.addEventListener('input', () => clampAndApply('min'));
 pcmMax.addEventListener('input', () => clampAndApply('max'));
-updatePcmLabels();
+document.getElementById('btnReset').addEventListener('click', () => {
+  filterText.value = '';
+  filterPostcode.value = '';
+  filterAgent.value = '';
+  pcmMin.value = pcmMin.min;
+  pcmMax.value = pcmMax.max;
+  updateSlider();
+  applyFilters();
+});
+updateSlider();
+applyFilters();
 
 function escapeHtml(text) {
   const div = document.createElement('div');
@@ -203,7 +306,9 @@ let leafletMap;
 function initMap() {
   const points = PROPERTIES.filter(p => p.lat && p.lon);
   if (points.length === 0) {
-    document.getElementById('mapNote').textContent = 'No se pudo cargar el mapa: no hay propiedades geocodificadas (revisá tu conexión a internet la próxima vez que regeneres el dashboard).';
+    const note = document.getElementById('mapNote');
+    note.style.display = '';
+    note.textContent = 'No hay propiedades geocodificadas para mostrar en el mapa.';
     return;
   }
   leafletMap = L.map('map');
@@ -213,13 +318,26 @@ function initMap() {
   }).addTo(leafletMap);
   const bounds = [];
   points.forEach(p => {
-    const marker = L.marker([p.lat, p.lon]).addTo(leafletMap);
-    const pcmText = p.pcm ? '£' + Number(p.pcm).toLocaleString() : '';
-    const link = p.rightmove_url ? ('<br><a href="' + escapeHtml(p.rightmove_url) + '" target="_blank" rel="noopener">Rightmove</a>') : '';
-    marker.bindPopup('<strong>' + escapeHtml(p.postcode) + '</strong><br>' + escapeHtml(p.neighborhood) + '<br>' + pcmText + ' &middot; ' + escapeHtml(p.agent) + link);
+    const priceText = p.pcm ? '£' + Number(p.pcm).toLocaleString() : '?';
+    const pinIcon = L.divIcon({
+      className: '',
+      html: '<div class="price-pin">' + priceText + '</div>',
+      iconSize: null,
+      iconAnchor: [0, 0]
+    });
+    const marker = L.marker([p.lat, p.lon], { icon: pinIcon }).addTo(leafletMap);
+    const link = p.rightmove_url
+      ? '<a class="btn-link" href="' + escapeHtml(p.rightmove_url) + '" target="_blank" rel="noopener">Ver en Rightmove</a>'
+      : '';
+    marker.bindPopup(
+      '<div class="popup-name">' + escapeHtml(p.postcode) + '</div>' +
+      '<div class="popup-sub">' + escapeHtml(p.neighborhood) + '</div>' +
+      '<div class="popup-price">' + priceText + ' <span style="font-weight:400;color:#8a97a5;">/ mes</span></div>' +
+      '<div class="popup-agent">' + escapeHtml(p.agent) + '</div>' + link
+    );
     bounds.push([p.lat, p.lon]);
   });
-  leafletMap.fitBounds(bounds, { padding: [30, 30] });
+  leafletMap.fitBounds(bounds, { padding: [40, 40] });
 }
 
 document.querySelectorAll('.tab-btn').forEach(btn => {
