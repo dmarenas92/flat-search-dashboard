@@ -121,10 +121,10 @@
         <div class="hero-logo">£</div>
         <div>
           <h1>Flat Tracker</h1>
-          <div class="eyebrow">Camden · NW1 · London</div>
+          <div class="eyebrow">London</div>
         </div>
       </div>
-      <p class="hero-sub">Last updated 2026-07-05 08:51 · 6 properties tracked</p>
+      <p class="hero-sub">Last updated 2026-07-05 09:04 · 6 properties tracked</p>
     </div>
   </header>
 
@@ -142,6 +142,13 @@
       <div class="field">
         <label for="filter">Search</label>
         <input id="filter" type="text" placeholder="Neighborhood, agent, features...">
+      </div>
+      <div class="field">
+        <label for="filterStatus">Status</label>
+        <select id="filterStatus">
+          <option value="">All</option>
+          <option value="Not contacted">Not contacted</option><option value="Contacted">Contacted</option><option value="Replied">Replied</option><option value="Rejected">Rejected</option><option value="Viewed">Viewed</option><option value="Selected">Selected</option>
+        </select>
       </div>
       <div class="field">
         <label for="filterPostcode">Postcode</label>
@@ -211,7 +218,7 @@
       </div>
     </section>
 
-    <footer>Flat Tracker · generated 2026-07-05 08:51</footer>
+    <footer>Flat Tracker · generated 2026-07-05 09:04</footer>
   </div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -245,6 +252,7 @@ headers.forEach((th, idx) => {
 });
 
 const filterText = document.getElementById('filter');
+const filterStatus = document.getElementById('filterStatus');
 const filterPostcode = document.getElementById('filterPostcode');
 const filterAgent = document.getElementById('filterAgent');
 const pcmMin = document.getElementById('pcmMin');
@@ -265,8 +273,17 @@ function updateSlider() {
   pcmFill.style.width = (b - a) + '%';
 }
 
+function rowSearchText(row) {
+  return Array.from(row.children).map(td => {
+    const select = td.querySelector('select');
+    if (select) return select.options[select.selectedIndex].text;
+    return td.textContent;
+  }).join(' ').toLowerCase();
+}
+
 function applyFilters() {
   const q = filterText.value.toLowerCase();
+  const statusVal = filterStatus.value;
   const postcodeVal = filterPostcode.value;
   const agentVal = filterAgent.value;
   const minVal = parseFloat(pcmMin.value);
@@ -274,9 +291,11 @@ function applyFilters() {
   let visibleCount = 0;
   document.querySelectorAll('#listings tbody tr').forEach(row => {
     const rowPostcode = row.children[0].dataset.value;
+    const rowStatus = row.children[1].dataset.value;
     const rowPcm = parseFloat(row.children[2].dataset.value);
     const rowAgent = row.children[5].dataset.value;
-    let visible = row.textContent.toLowerCase().includes(q);
+    let visible = rowSearchText(row).includes(q);
+    if (statusVal && rowStatus !== statusVal) visible = false;
     if (postcodeVal && rowPostcode !== postcodeVal) visible = false;
     if (agentVal && rowAgent !== agentVal) visible = false;
     if (!isNaN(rowPcm) && (rowPcm < minVal || rowPcm > maxVal)) visible = false;
@@ -296,12 +315,14 @@ function clampAndApply(moved) {
 }
 
 filterText.addEventListener('input', applyFilters);
+filterStatus.addEventListener('change', applyFilters);
 filterPostcode.addEventListener('change', applyFilters);
 filterAgent.addEventListener('change', applyFilters);
 pcmMin.addEventListener('input', () => clampAndApply('min'));
 pcmMax.addEventListener('input', () => clampAndApply('max'));
 document.getElementById('btnReset').addEventListener('click', () => {
   filterText.value = '';
+  filterStatus.value = '';
   filterPostcode.value = '';
   filterAgent.value = '';
   pcmMin.value = pcmMin.min;
@@ -340,6 +361,7 @@ document.querySelectorAll('.status-select').forEach(select => {
     select.classList.add(STATUS_CLASSES[select.value] || 'badge-gray');
     select.closest('td').dataset.value = select.value;
     if (key) localStorage.setItem(statusStorageKey(key), select.value);
+    applyFilters();
   });
 });
 
