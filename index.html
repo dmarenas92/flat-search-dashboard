@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Flat Search Dashboard</title>
+<title>Flat Tracker</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%2316324f'/%3E%3Ctext x='32' y='44' font-size='34' font-family='Arial' font-weight='bold' fill='white' text-anchor='middle'%3E%C2%A3%3C/text%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -14,10 +14,12 @@
   body { font-family: 'Inter', -apple-system, 'Segoe UI', Arial, sans-serif; margin: 0; color: #1c2733; background: #f4f6f9; font-size: 14px; }
   .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
 
-  .hero { background: #16324f; color: #fff; padding: 34px 0 30px; }
-  .eyebrow { font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: #9fb6cd; font-weight: 600; margin-bottom: 6px; }
-  .hero h1 { margin: 0 0 6px; font-size: 26px; font-weight: 700; letter-spacing: -.01em; }
-  .hero-sub { margin: 0; color: #b9c9da; font-size: 13px; }
+  .hero { background: linear-gradient(165deg, #1a3a5c 0%, #16324f 55%, #122943 100%); color: #fff; padding: 38px 0 26px; }
+  .hero-top { display: flex; align-items: center; gap: 16px; }
+  .hero-logo { width: 50px; height: 50px; border-radius: 14px; background: #0e263e; border: 1px solid rgba(255,255,255,.14); display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 700; color: #7fb8f2; flex-shrink: 0; }
+  .hero h1 { margin: 0; font-size: 30px; font-weight: 700; letter-spacing: -.02em; }
+  .eyebrow { font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: #93b3d4; font-weight: 600; margin-top: 4px; }
+  .hero-sub { margin: 18px 0 0; padding-top: 16px; border-top: 1px solid rgba(255,255,255,.12); color: #b9c9da; font-size: 13px; }
 
   .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin: -22px 0 22px; }
   .stat { background: #fff; border: 1px solid #e4e9f0; border-radius: 12px; padding: 16px 18px; display: flex; align-items: center; gap: 13px; box-shadow: 0 1px 3px rgba(16,24,40,.06); }
@@ -105,9 +107,14 @@
 <body>
   <header class="hero">
     <div class="container">
-      <div class="eyebrow">Flat Tracker · Camden · NW1 · London</div>
-      <h1>Flat Search Dashboard</h1>
-      <p class="hero-sub">Last updated 2026-07-04 21:48 · 5 properties tracked</p>
+      <div class="hero-top">
+        <div class="hero-logo">£</div>
+        <div>
+          <h1>Flat Tracker</h1>
+          <div class="eyebrow">Camden · NW1 · London</div>
+        </div>
+      </div>
+      <p class="hero-sub">Last updated 2026-07-04 21:51 · 5 properties tracked</p>
     </div>
   </header>
 
@@ -193,7 +200,7 @@
       </div>
     </section>
 
-    <footer>Flat Tracker · generated 2026-07-04 21:48</footer>
+    <footer>Flat Tracker · generated 2026-07-04 21:51</footer>
   </div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
