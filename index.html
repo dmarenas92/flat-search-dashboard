@@ -129,7 +129,7 @@
           <div class="eyebrow">London</div>
         </div>
       </div>
-      <p class="hero-sub">Last updated 2026-07-09 07:57 · 18 properties tracked</p>
+      <p class="hero-sub">Last updated 2026-07-09 08:11 · 18 properties tracked</p>
     </div>
   </header>
 
@@ -141,7 +141,10 @@
         <button class="tab-btn active" data-tab="table">Table</button>
         <button class="tab-btn" data-tab="map">Map</button>
       </div>
-      <button class="btn-toggle" id="btnHideDiscarded" title="Hides properties marked Discard/Rejected, or whose Availability isn't Available">Hide discarded &amp; unavailable</button>
+      <div style="display:flex; gap:10px;">
+        <button class="btn-toggle" id="btnHideDiscarded" title="Hides properties marked Discard/Rejected, or whose Availability isn't Available">Hide discarded &amp; unavailable</button>
+        <button class="btn-toggle" id="btnExportStatus" title="Downloads a JSON file with every Status change saved in this browser, so you can share it to make them official">Export status changes</button>
+      </div>
     </div>
 
     <div class="filters">
@@ -227,7 +230,7 @@
       </div>
     </section>
 
-    <footer>Flat Tracker · generated 2026-07-09 07:57</footer>
+    <footer>Flat Tracker · generated 2026-07-09 08:11</footer>
   </div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -386,6 +389,29 @@ document.querySelectorAll('.status-select').forEach(select => {
     if (key) localStorage.setItem(statusStorageKey(key), select.value);
     applyFilters();
   });
+});
+
+document.getElementById('btnExportStatus').addEventListener('click', () => {
+  const data = {};
+  document.querySelectorAll('.status-select').forEach(select => {
+    const key = select.dataset.key;
+    if (!key) return;
+    const saved = localStorage.getItem(statusStorageKey(key));
+    if (saved) data[key] = saved;
+  });
+  if (Object.keys(data).length === 0) {
+    alert('No local Status changes to export yet — nothing has been changed via the dropdowns in this browser.');
+    return;
+  }
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'flat-tracker-status-export.json';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
 });
 
 function escapeHtml(text) {
